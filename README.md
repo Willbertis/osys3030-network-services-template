@@ -1,18 +1,18 @@
 # OSYS3030 - Linux Network Appliance Documentation
 
-> **Student Name:** [Your Name]  
-> **Student ID / VMID:** [e.g., 106]  
-> **Repository:** [Public GitHub URL]  
-> **Instructor:** Matt Redmond  
-> **Course:** OSYS3030 - Network Services Using Linux  
+> **Student Name:** William Gilbert
+> **Student ID / VMID:** 101
+> **Repository:** https://github.com/Willbertis/osys3030-network-services-template
+> **Instructor:** Matt Redmond
+> **Course:** OSYS3030 - Network Services Using Linux
 
 ---
 
 ## 1. Appliance Overview
-A high-level summary of your multi-homed Linux server appliance, its purpose, and its role as a gateway/router for the private internal network.
+This Ubuntu Server 24.04 appliance provides network services for an isolated internal network. It uses two network interfaces to connect the school network to a private LAN. The server provides DNS, DHCP, SSH remote access, and firewall services with NAT masquerading to allow internal clients to access external networks.
 
 * **Operating System:** Ubuntu Server 24.04 LTS (Noble Numbat)
-* **Hostname:** `server-[YourID]` (e.g., `robserver`)
+* **Hostname:** `bertis`
 * **Primary Roles:**
   * Router & Firewall (UFW + iptables NAT masquerading)
   * Recursive & Authoritative DNS (BIND9)
@@ -29,32 +29,32 @@ A high-level summary of your multi-homed Linux server appliance, its purpose, an
               |             10.20.0.0/23                 |
               +---------------------+--------------------+
                                     |
-                                    | (DHCP / Static IP)
+                                    | (10.20.1.120/23)
                                  [ens18]
                        +------------+------------+
                        |   OSYS3030 Linux Server |
-                       |      (Your Appliance)   |
+                       |          bertis         |
                        +------------+------------+
                                  [ens19]
-                                    | (10.<ID>.0.250/24)
+                                    | (10.101.0.250/24)
                                     |
               +---------------------+--------------------+
               |        Isolated Private VLAN (vmbr5)      |
-              |             10.<ID>.0.0/24               |
+              |             10.101.0.0/24               |
               +---------------------+--------------------+
                                     |
-                                    | (DHCP: 10.<ID>.0.10 - .200)
+                                    | (DHCP: 10.101.0.10 - .200)
                                  [eth0]
                        +------------+------------+
                        |    Alpine Client VM     |
-                       |       (VM 91<ID>)       |
+                       |       (VM 9101)         |
                        +-------------------------+
 ```
 
 | Interface | Network Zone | IP Address / Subnet | Purpose |
 | :--- | :--- | :--- | :--- |
-| `ens18` | WAN / External | `10.20.1.<ID>/23` | Upstream internet & SSH management |
-| `ens19` | LAN / Internal | `10.<ID>.0.250/24` | Default gateway & service binding for clients |
+| `ens18` | WAN / External | `10.20.1.120/23` | Upstream internet & SSH management |
+| `ens19` | LAN / Internal | `10.101.0.250/24` | Default gateway & service binding for clients |
 
 ---
 
@@ -62,7 +62,7 @@ A high-level summary of your multi-homed Linux server appliance, its purpose, an
 
 | Directory | Service | Daemon | Listening Ports | Description |
 | :--- | :--- | :--- | :--- | :--- |
-| [`hardening/`](./hardening/) | SSH / Host Security | `sshd` | TCP 22 | Hardened SSH configuration, root restrictions |
+| [`hardening/`](./hardening/) | SSH / Host Security | `sshd` | TCP 2222 | Hardened SSH configuration, root restrictions |
 | [`dns/`](./dns/) | BIND9 DNS | `named` | UDP/TCP 53 | Authoritative for `innovate.lab` & recursive forwarder |
 | [`dhcp/`](./dhcp/) | Kea DHCPv4 | `kea-dhcp4` | UDP 67 | Scoped dynamic IP lease allocation for LAN |
 | [`fw/`](./fw/) | UFW Firewall & NAT | `ufw` / `iptables` | N/A | State-tracking firewall & packet masquerading |
@@ -71,7 +71,70 @@ A high-level summary of your multi-homed Linux server appliance, its purpose, an
 ---
 
 ## 4. Base OS & Netplan Prerequisites
-Document any one-time operating system setup steps, package manager configurations, and your `/etc/netplan/*.yaml` static interface definitions required before services can be installed.
+This appliance runs Ubuntu Server 24.04 LTS and uses Netplan with the networkd renderer to configure both network interfaces. Both interfaces use static IP addresses to keep the network services accessible at consistent addresses.
+
+The WAN interface (ens18) connects to the school network, while the LAN interface (ens19) connects to the isolated internal network.
+
+### Network Configuration
+
+The main Netplan configuration file is /etc/netplan/01-netcfg.yaml.
+
+```yaml
+network:
+  version: 2
+  renderer: networkd
+  ethernets:
+    ens18:
+      addresses:
+        - 10.20.1.120/23
+      nameservers:
+        addresses:
+          - 10.20.0.1
+      dhcp4: false
+      routes:
+        - to: default
+          via: 10.20.0.1
+    ens19:
+      addresses:
+        - 10.101.0.250/24
+      dhcp4: false
+      mtu: 9000
+```
+
+### Base OS Prerequisites
+
+Before deploying the appliance services, Ubuntu Server 24.04 LTS must be installed with two network interfaces.
+
+The following packages are required:
+
+openssh-server — SSH remote administration
+
+bind9, bind9-utils, dnsutils — DNS services and testing
+
+kea-dhcp4-server — DHCPv4 service
+
+ufw, iptables — Firewall and NAT masquerading
+
+git — Repository management
+
+Install the packages using:
+
+```bash
+sudo apt update
+sudo apt install openssh-server bind9 bind9-utils dnsutils kea-dhcp4-server ufw iptables git -y
+```
+
+### Network Verification
+
+After configuring Netplan, verify the network interfaces using:
+
+```bash
+ip -br addr
+ip route
+sudo netplan get
+```
+
+Confirm that ens18 and ens19 have their assigned IP addresses and that the default route uses 10.20.0.1.
 
 ---
 
