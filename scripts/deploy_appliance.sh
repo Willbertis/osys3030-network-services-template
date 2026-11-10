@@ -145,6 +145,10 @@ grep -Fq -- '-A POSTROUTING -s 10.101.0.0/24 -o ens18 -j MASQUERADE' "$REPO_DIR/
 if deploy_file "$REPO_DIR/fw/before.rules" /etc/ufw/before.rules root root 640; then FW_CHANGED=1; fi
 
 # Allow the real SSH port BEFORE applying/reloading firewall rules.
+# Back up existing UFW rules before making changes.
+for ufw_file in /etc/ufw/user.rules /etc/ufw/user6.rules /etc/default/ufw; do
+    [[ -f "$ufw_file" ]] && backup_file "$ufw_file"
+done
 current_policies="$(LC_ALL=C ufw status verbose)"
 if ! grep -Fq 'Default: deny (incoming), allow (outgoing), allow (routed)' <<< "$current_policies"; then
     ufw default deny incoming
