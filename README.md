@@ -1,7 +1,7 @@
 # OSYS3030 - Linux Network Appliance Documentation
 
 > **Student Name:** William Gilbert
-> **Student ID:** W0453411 
+> **Student ID:** W0453411
 > **VMID:** 101
 > **Repository:** https://github.com/Willbertis/osys3030-network-services-template
 > **Instructor:** Matt Redmond
