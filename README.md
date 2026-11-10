@@ -1,7 +1,8 @@
 # OSYS3030 - Linux Network Appliance Documentation
 
 > **Student Name:** William Gilbert
-> **Student ID / VMID:** 101
+> **Student ID:** W0453411 
+> **VMID:** 101
 > **Repository:** https://github.com/Willbertis/osys3030-network-services-template
 > **Instructor:** Matt Redmond
 > **Course:** OSYS3030 - Network Services Using Linux
@@ -152,6 +153,8 @@ This appliance includes automated deployment and verification scripts located in
   ```
 
 See [`AI_AUDIT.md`](./AI_AUDIT.md) for documentation on how these scripts were generated using AI and audited for accuracy.
+
+The verification script was tested against my existing Ubuntu appliance, with all 24 checks passing. The deployment script passed Bash syntax validation but has not undergone a full recovery test on a fresh installation. The deployment script should be reviewed and tested in a controlled environment before being used on a production system.
 
 ---
 
