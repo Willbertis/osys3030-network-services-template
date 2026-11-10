@@ -1,8 +1,8 @@
 # AI Automation & Code Audit Log
 
-> **Student Name:** [Your Name]  
-> **Student ID:** [Your ID]  
-> **AI Tool Used:** [e.g., ChatGPT 4o / Claude 3.5 Sonnet / Gemini 1.5 Pro]  
+> **Student Name:** William Gilbert
+> **Student ID:** W0453411
+> **AI Tool Used:** ChatGPT
 
 ---
 
@@ -24,7 +24,7 @@ Act as a Senior Linux DevOps Engineer. Using my attached Markdown guides and con
 Paste the exact prompt you gave the AI to generate `verify_appliance.sh`:
 
 ```text
-I provided ChatGPT with the contents of the instructor's verify_appliance.sh.sample file and continued our discussion about adapting it to my existing Ubuntu appliance. The script needed to check SSH on port 2222, BIND9 DNS, Kea DHCPv4, UFW firewall rules, and NAT masquerading. After generating the script, I tested it and provided the results to ChatGPT to troubleshoot the failed checks.
+I did not use a separate written prompt for this script. I provided ChatGPT with the complete contents of the instructor's `verify_appliance.sh.sample` file, and ChatGPT generated a customized verification script using our previous discussions about my server configuration. My original input was the sample script pasted from the terminal.
 ```
 
 ---
@@ -43,14 +43,60 @@ AI models frequently introduce errors when writing infrastructure automation. Do
 
 ## 4. Testing & Verification Results
 
-* **Date Tested:** [YYYY-MM-DD]
-* **Target Environment:** [e.g., OSYS3030 Baseline Server (VMID 106)]
-* **Verification Script Output:**
+* **Date Tested:** 2026-11-10
+* **Target Environment:** Ubuntu Server 24.04 (bertis), OSYS3030 Network Appliance
+* **Verification Script Output:** 24 Pass, 0 Fail
+
+I ran the verification script against my existing Ubuntu network appliance. Initially, three UFW checks failed because the script was looking for the wrong output format. After correcting this issue, I ran the script again and all 24 checks passed.
+
+I also tested the deployment script using bash -n to check for syntax errors. The script passed this check, but I have not yet performed a full deployment test on a fresh Ubuntu installation.
+
   ```text
-  [Paste the terminal output of running sudo ./scripts/verify_appliance.sh showing PASS]
+============================================================
+  OSYS3030 Appliance Health & Verification Suite
+============================================================
+
+--- 1. Network prerequisites ---
+  WAN ens18 has 10.20.1.120/23                               [ PASS ]
+  LAN ens19 has 10.101.0.250/24                              [ PASS ]
+
+--- 2. BIND9 DNS ---
+  BIND9 named service active                                 [ PASS ]
+  BIND9 syntax valid (named-checkconf)                       [ PASS ]
+  innovate.lab zone valid                                    [ PASS ]
+  DNS listening on UDP port 53                               [ PASS ]
+  web.innovate.lab resolves to LAN address                   [ PASS ]
+
+--- 3. Kea DHCPv4 ---
+  Kea DHCPv4 service active                                  [ PASS ]
+  Kea syntax valid (run as _kea)                             [ PASS ]
+  DHCP listening on UDP port 67                              [ PASS ]
+
+--- 4. SSH hardening ---
+  SSH service or socket active                               [ PASS ]
+  OpenSSH configuration syntax valid                         [ PASS ]
+  SSH configured for TCP port 2222                           [ PASS ]
+  Root login disabled                                        [ PASS ]
+  Password authentication disabled                           [ PASS ]
+  SSH listening on TCP port 2222                             [ PASS ]
+
+--- 5. UFW firewall and routing ---
+  UFW firewall active                                        [ PASS ]
+  IPv4 forwarding enabled                                    [ PASS ]
+  NAT rule stored in UFW before.rules                        [ PASS ]
+  Active NAT MASQUERADE rule correct                         [ PASS ]
+  UFW permits SSH 2222 inbound                               [ PASS ]
+  UFW permits DNS on LAN                                     [ PASS ]
+  UFW permits DHCP on LAN                                    [ PASS ]
+  UFW allows LAN-to-WAN forwarding                           [ PASS ]
+
+============================================================
+  Results: 24 PASS, 0 FAIL
+  All appliance checks passed.
   ```
 
 ---
 
 ## 5. Attestation
-I attest that I have personally reviewed, tested, and understand every line of code in the generated scripts. I am prepared to explain any part of these scripts or configuration files during an evaluation.
+
+I confirm that I have reviewed the AI-generated scripts and made corrections where needed. I tested the verification script against my existing Ubuntu server, and all 24 checks passed. I also checked the deployment script for syntax errors, but I have not completed a full deployment test. I understand the purpose of both scripts, how they work with my network configuration, and the changes they make to the system. I am prepared to explain my work and the corrections I made during an evaluation.
